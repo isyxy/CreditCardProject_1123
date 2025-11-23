@@ -1,6 +1,7 @@
 // src/context/CardContext.tsx
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { availableCreditCards } from '../data/creditCards';
 
 // 定義信用卡資料結構
 export interface CreditCard {
@@ -38,6 +39,15 @@ export const CardProvider = ({ children }: { children: ReactNode }) => {
       const savedCards = await AsyncStorage.getItem('creditCards');
       if (savedCards) {
         setCards(JSON.parse(savedCards));
+      } else {
+        const initializedCards = availableCreditCards.map(card => ({
+          ...card,
+          id: `${card.bankName}-${card.cardName}`,
+          isActive: true,
+        }));
+
+        setCards(initializedCards);
+        await saveCards(initializedCards);
       }
     } catch (error) {
       console.error('載入卡片失敗:', error);
